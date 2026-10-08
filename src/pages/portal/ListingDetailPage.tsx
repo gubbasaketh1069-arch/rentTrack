@@ -22,6 +22,7 @@ import {
 import { useMyTenant } from "@/hooks/useTenantPortal"
 import { inr, locationLine } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { propertyPhotoUrl } from "@/lib/propertyPhotos"
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
@@ -147,7 +148,16 @@ export default function ListingDetailPage() {
     )
   }
 
-  const photos = [...(l.photos ?? [])].sort((a, b) => a.sort_order - b.sort_order)
+  const listingPhotos = [...(l.photos ?? [])]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((p) => ({ key: p.id, url: listingPhotoUrl(p.storage_path) }))
+  // Same priority as the Find-a-Flat cards: listing → flat → property photos.
+  const fallbackPhotos = (
+    (l.flat?.photos?.length ?? 0) > 0
+      ? (l.flat?.photos as string[])
+      : ((l.property?.photos ?? []) as string[])
+  ).map((path, i) => ({ key: `fallback-${i}`, url: propertyPhotoUrl(path) }))
+  const gallery = listingPhotos.length > 0 ? listingPhotos : fallbackPhotos
   const feats = (l.flat?.features ?? []).map((x) => x.feature)
 
   return (
@@ -159,17 +169,17 @@ export default function ListingDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Back to search
       </Link>
 
-      {photos.length > 0 && (
+      {gallery.length > 0 && (
         <div className="grid grid-cols-2 gap-2">
           <img
-            src={listingPhotoUrl(photos[0].storage_path)}
+            src={gallery[0].url}
             alt=""
             className="col-span-2 h-64 w-full rounded-lg object-cover"
           />
-          {photos.slice(1, 5).map((p) => (
+          {gallery.slice(1, 5).map((p) => (
             <img
-              key={p.id}
-              src={listingPhotoUrl(p.storage_path)}
+              key={p.key}
+              src={p.url}
               alt=""
               className="h-32 w-full rounded-lg object-cover"
             />

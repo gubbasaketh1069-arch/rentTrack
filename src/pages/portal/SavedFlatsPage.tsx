@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { GitCompareArrows, Heart, HeartCrack } from "lucide-react"
+import { Building2, GitCompareArrows, Heart, HeartCrack } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -145,19 +145,23 @@ export default function SavedFlatsPage() {
                 key={l.id}
                 className={cn("overflow-hidden", on && "ring-2 ring-primary")}
               >
-                {thumb && (
-                  <img src={listingPhotoUrl(thumb.storage_path)} alt="" className="h-36 w-full object-cover" />
+                {thumb ? (
+                  <img src={listingPhotoUrl(thumb.storage_path)} alt="" className="h-52 w-full object-cover" />
+                ) : (
+                  <div className="flex h-52 items-center justify-center bg-[#F0F0F0] text-neutral-400">
+                    <Building2 className="h-10 w-10" />
+                  </div>
                 )}
-                <div className="space-y-2 p-4">
-                  <Link to={`/home/find-flat/${l.id}`} className="font-semibold leading-tight hover:underline">
+                <div className="space-y-2 p-5">
+                  <Link to={`/home/find-flat/${l.id}`} className="font-bold leading-tight tracking-tight hover:underline">
                     {l.title}
                   </Link>
                   <p className="text-sm text-muted-foreground">
                     {locationLine(l.property?.locality, l.property?.area, l.property?.city)}
                   </p>
-                  <p className="text-lg font-bold">
+                  <p className="text-2xl font-extrabold tracking-tight">
                     {inr(l.rent ?? l.flat?.rent ?? 0)}
-                    <span className="text-xs font-normal text-muted-foreground"> /month</span>
+                    <span className="text-xs font-medium text-muted-foreground"> /month</span>
                   </p>
                   <div className="flex gap-2">
                     <Button

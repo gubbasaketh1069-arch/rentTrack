@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth"
 import { logActivity } from "@/lib/activity"
+import { deletePhotoObjects } from "@/lib/propertyPhotos"
 
 export interface Property {
   id: string
@@ -24,6 +25,8 @@ export interface Property {
   late_fee_grace_days: number | null
   late_fee_fixed: number | string | null
   late_fee_per_day: number | string | null
+  /** Ordered photo storage paths in the property-images bucket (first = cover). */
+  photos: string[]
   created_at: string
   updated_at: string
 }
@@ -51,6 +54,8 @@ export interface Flat {
   is_pg: boolean
   /** Number of beds when is_pg is true. */
   bed_count: number
+  /** Ordered photo storage paths in the property-images bucket (first = cover). */
+  photos: string[]
 }
 
 export interface ActiveTenancy {
@@ -298,6 +303,20 @@ export function useDeleteProperty() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (propertyId: string) => {
+      // Collect photo paths BEFORE the cascade delete (flats cascade), and
+      // remove the storage objects first — a failure aborts before anything
+      // is deleted, so no orphaned files remain.
+      const [{ data: prop }, { data: flatRows }] = await Promise.all([
+        supabase.from("properties").select("photos").eq("id", propertyId).single(),
+        supabase.from("flats").select("photos").eq("property_id", propertyId),
+      ])
+      const paths: string[] = [
+        ...(((prop?.photos as string[] | null) ?? []) as string[]),
+        ...((flatRows ?? []).flatMap(
+          (f) => ((f.photos as string[] | null) ?? []) as string[]
+        )),
+      ]
+      await deletePhotoObjects(paths)
       const { error } = await supabase
         .from("properties")
         .delete()
@@ -406,6 +425,14 @@ export function useDeleteFlat(propertyId: string) {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async (flatId: string) => {
+      // Remove the flat's photo objects before deleting the row — a storage
+      // failure aborts before anything is deleted, so no orphans remain.
+      const { data } = await supabase
+        .from("flats")
+        .select("photos")
+        .eq("id", flatId)
+        .single()
+      await deletePhotoObjects(((data?.photos as string[] | null) ?? []) as string[])
       const { error } = await supabase.from("flats").delete().eq("id", flatId)
       if (error) throw new Error(error.message)
     },

@@ -69,9 +69,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
@@ -85,9 +85,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
       <div className="border-t p-4">
         <UserFooter />
-        <p className="mt-3 text-xs text-muted-foreground">
-          RentTrack · Phase 8 — marketplace.
-        </p>
+        <p className="mt-3 text-xs text-muted-foreground">RentTrack</p>
       </div>
     </div>
   )
@@ -131,7 +129,7 @@ export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="flex min-h-screen bg-white">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r bg-card lg:block">
         <SidebarContent />

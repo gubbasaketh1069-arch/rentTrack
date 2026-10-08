@@ -157,7 +157,7 @@ export default function ReportsPage() {
                 className={cn(
                   "rounded-md px-3 py-2 text-left text-sm transition-colors",
                   reportId === r.id
-                    ? "bg-indigo-600 font-medium text-white"
+                    ? "bg-black font-medium text-white"
                     : "hover:bg-accent"
                 )}
               >

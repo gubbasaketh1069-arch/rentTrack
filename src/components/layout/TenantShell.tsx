@@ -71,9 +71,9 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
@@ -152,8 +152,10 @@ function MobileTabBar() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px] font-medium",
-                  isActive ? "text-primary" : "text-muted-foreground"
+                  "flex flex-col items-center gap-1 py-2.5 text-[11px]",
+                  isActive
+                    ? "font-bold text-primary"
+                    : "font-medium text-muted-foreground"
                 )
               }
             >
@@ -178,7 +180,7 @@ function MobileTabBar() {
               key={item.to}
               to={item.to}
               onClick={() => setMoreOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             >
               <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
@@ -209,7 +211,7 @@ function MobileTabBar() {
  */
 export default function TenantShell() {
   return (
-    <div className="flex min-h-screen bg-muted/40">
+    <div className="flex min-h-screen bg-white">
       <aside className="hidden w-64 shrink-0 border-r bg-card lg:block">
         <SidebarContent />
       </aside>

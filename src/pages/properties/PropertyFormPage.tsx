@@ -22,6 +22,9 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/toast"
+import { supabase } from "@/lib/supabase"
+import { uploadPropertyPhoto } from "@/lib/propertyPhotos"
+import PhotoUploader from "@/components/properties/PhotoUploader"
 
 const EMPTY: PropertyInput = {
   name: "",
@@ -41,6 +44,7 @@ const EMPTY: PropertyInput = {
   late_fee_grace_days: 5,
   late_fee_fixed: 0,
   late_fee_per_day: 0,
+  photos: [],
 }
 
 function blank(v: string): string | null {
@@ -62,6 +66,8 @@ export default function PropertyFormPage() {
   const updateMutation = useUpdateProperty(id ?? "")
 
   const [form, setForm] = useState<PropertyInput>(EMPTY)
+  const [photos, setPhotos] = useState<string[]>([])
+  const [pendingPhotos, setPendingPhotos] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -85,7 +91,10 @@ export default function PropertyFormPage() {
         late_fee_grace_days: p.late_fee_grace_days ?? 5,
         late_fee_fixed: p.late_fee_fixed ?? 0,
         late_fee_per_day: p.late_fee_per_day ?? 0,
+        photos: p.photos ?? [],
       })
+      setPhotos(p.photos ?? [])
+      setPendingPhotos([])
     }
   }, [existing.data])
 
@@ -118,14 +127,47 @@ export default function PropertyFormPage() {
       late_fee_grace_days: Math.max(0, Math.floor(Number(form.late_fee_grace_days) || 0)),
       late_fee_fixed: Math.max(0, Number(form.late_fee_fixed) || 0),
       late_fee_per_day: Math.max(0, Number(form.late_fee_per_day) || 0),
+      photos,
     }
     try {
       if (isEdit) {
-        await updateMutation.mutateAsync(payload)
+        // Upload staged photos first so the row is saved once, with the
+        // final ordered list.
+        let finalPhotos = photos
+        if (pendingPhotos.length > 0) {
+          const uploaded: string[] = []
+          for (const file of pendingPhotos) {
+            uploaded.push(await uploadPropertyPhoto(id!, file))
+          }
+          finalPhotos = [...photos, ...uploaded]
+        }
+        await updateMutation.mutateAsync({ ...payload, photos: finalPhotos })
         toast("success", "Property updated.")
         navigate(`/properties/${id}`, { replace: true })
       } else {
         const created = await createMutation.mutateAsync(payload)
+        // Upload staged photos now that the property (and its storage
+        // write access) exists, then attach the paths to the row.
+        if (pendingPhotos.length > 0) {
+          try {
+            const uploaded: string[] = []
+            for (const file of pendingPhotos) {
+              uploaded.push(await uploadPropertyPhoto(created.id, file))
+            }
+            const { error: phErr } = await supabase
+              .from("properties")
+              .update({ photos: uploaded })
+              .eq("id", created.id)
+            if (phErr) throw new Error(phErr.message)
+          } catch (photoErr) {
+            toast(
+              "error",
+              photoErr instanceof Error
+                ? `Property created, but photos failed: ${photoErr.message}`
+                : "Property created, but some photos failed to upload."
+            )
+          }
+        }
         toast("success", "Property created.")
         navigate(`/properties/${created.id}`, { replace: true })
       }
@@ -237,12 +279,20 @@ export default function PropertyFormPage() {
                 onChange={(e) => set("notes", e.target.value)}
               />
             </div>
+            <PhotoUploader
+              label="Property photos"
+              paths={photos}
+              onPathsChange={setPhotos}
+              pending={pendingPhotos}
+              onPendingChange={setPendingPhotos}
+              disabled={saving}
+            />
             <div className="rounded-xl border p-4">
               <div className="flex items-center gap-2">
                 <input
                   id="late-fee-enabled"
                   type="checkbox"
-                  className="h-4 w-4 accent-indigo-600"
+                  className="h-4 w-4 accent-black"
                   checked={Boolean(form.late_fee_enabled)}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, late_fee_enabled: e.target.checked }))

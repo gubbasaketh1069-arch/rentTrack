@@ -96,7 +96,7 @@ function DashboardBody({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-3xl font-extrabold tracking-tight">
               {currentRent != null ? inr(currentRent) : "—"}
             </p>
             <p className="text-xs text-muted-foreground">per month</p>
@@ -110,7 +110,7 @@ function DashboardBody({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">
+            <p className="text-3xl font-extrabold tracking-tight">
               {currentRecord ? inr(Number(currentRecord.total_payable)) : "—"}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -126,7 +126,7 @@ function DashboardBody({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-status-paid">
+            <p className="text-3xl font-extrabold tracking-tight text-status-paid">
               {currentRecord ? inr(Number(currentRecord.total_paid)) : "—"}
             </p>
           </CardContent>
@@ -139,7 +139,7 @@ function DashboardBody({
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-2">
-            <p className="text-2xl font-bold text-status-due">
+            <p className="text-3xl font-extrabold tracking-tight text-status-due">
               {currentRecord ? inr(Number(currentRecord.remaining_due)) : "—"}
             </p>
             {currentRecord && (

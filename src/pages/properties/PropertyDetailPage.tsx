@@ -40,6 +40,7 @@ import FloorManager from "@/components/properties/FloorManager"
 import FlatFormDialog from "@/components/properties/FlatFormDialog"
 import AddTenantDialog from "@/components/tenants/AddTenantDialog"
 import PropertySharing from "@/components/properties/PropertySharing"
+import PhotoGallery from "@/components/properties/PhotoGallery"
 import { useMyPropertyRole } from "@/hooks/useMarketplace"
 import { inr, locationLine } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -319,6 +320,8 @@ export default function PropertyDetailPage() {
           <Badge variant="neutral">View-only access</Badge>
         )}
       </div>
+
+      {(p.photos ?? []).length > 0 && <PhotoGallery paths={p.photos} />}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Total flats" value={String(totalFlats)} icon={BedDouble} />

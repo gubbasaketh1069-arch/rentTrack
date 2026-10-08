@@ -148,7 +148,7 @@ export default function OnboardPage() {
       <div className="mx-auto max-w-xl p-6">
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CheckCircle2 className="h-12 w-12 text-green-600" />
+            <CheckCircle2 className="h-12 w-12 text-brand" />
             <h1 className="text-xl font-bold">Details submitted</h1>
             <p className="max-w-sm text-sm text-muted-foreground">
               Thank you, {tenant.full_name.trim()}. The property owner has been
@@ -164,7 +164,7 @@ export default function OnboardPage() {
   return (
     <div className="mx-auto max-w-xl space-y-6 p-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-indigo-700">RentTrack</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-black">RentTrack</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Tenant onboarding — {validated.property_name}
           {validated.flat_number ? ` · Flat ${validated.flat_number}` : ""}

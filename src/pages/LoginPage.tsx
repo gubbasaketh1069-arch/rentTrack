@@ -49,13 +49,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center bg-white p-4">
+      <Card className="w-full max-w-sm border-0 shadow-none">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-xl font-extrabold text-primary-foreground">
             R
           </div>
-          <CardTitle>RentTrack</CardTitle>
+          <CardTitle className="text-2xl font-extrabold tracking-tight">RentTrack</CardTitle>
           <CardDescription>
             Track Every Property. Manage Every Rent.
           </CardDescription>

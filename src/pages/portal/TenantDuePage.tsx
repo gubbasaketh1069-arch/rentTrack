@@ -53,7 +53,7 @@ function DueBody({ tenancyId }: { tenancyId: string }) {
           ) : (
             <div>
               <p className="text-sm text-muted-foreground">Total outstanding</p>
-              <p className="text-3xl font-bold text-status-due">{inr(outstanding)}</p>
+              <p className="text-4xl font-extrabold tracking-tight text-status-due">{inr(outstanding)}</p>
               {latest && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   as of {monthLabel(latest.year, latest.month)} — includes any

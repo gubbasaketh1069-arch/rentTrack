@@ -14,6 +14,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase"
+import { uploadFlatPhoto } from "@/lib/propertyPhotos"
+import PhotoUploader from "@/components/properties/PhotoUploader"
 
 interface FlatFormDialogProps {
   open: boolean
@@ -62,6 +65,8 @@ export default function FlatFormDialog({
   const [features, setFeatures] = useState<string[]>([])
   const [isPg, setIsPg] = useState(false)
   const [bedCount, setBedCount] = useState("")
+  const [photos, setPhotos] = useState<string[]>([])
+  const [pendingPhotos, setPendingPhotos] = useState<File[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -78,6 +83,8 @@ export default function FlatFormDialog({
       setFeatures(initialFeatures)
       setIsPg(flat?.is_pg ?? false)
       setBedCount(flat && flat.bed_count > 0 ? String(flat.bed_count) : "")
+      setPhotos(flat?.photos ?? [])
+      setPendingPhotos([])
       setError(null)
     }
   }, [open, flat, initialFeatures, defaultFloorId])
@@ -114,13 +121,46 @@ export default function FlatFormDialog({
       is_pg: isPg,
       bed_count: beds,
       features,
+      photos,
     }
     try {
       if (isEdit) {
-        await updateMutation.mutateAsync({ ...payload, id: flat.id })
+        // Upload staged photos first so the row is saved once, with the
+        // final ordered list.
+        let finalPhotos = photos
+        if (pendingPhotos.length > 0) {
+          const uploaded: string[] = []
+          for (const file of pendingPhotos) {
+            uploaded.push(await uploadFlatPhoto(propertyId, flat.id, file))
+          }
+          finalPhotos = [...photos, ...uploaded]
+        }
+        await updateMutation.mutateAsync({ ...payload, photos: finalPhotos, id: flat.id })
         toast("success", `Flat ${payload.flat_number} updated.`)
       } else {
-        await createMutation.mutateAsync(payload)
+        const created = await createMutation.mutateAsync(payload)
+        // Upload staged photos now that the flat (and its storage write
+        // access) exists, then attach the paths to the row.
+        if (pendingPhotos.length > 0) {
+          try {
+            const uploaded: string[] = []
+            for (const file of pendingPhotos) {
+              uploaded.push(await uploadFlatPhoto(propertyId, created.id, file))
+            }
+            const { error: phErr } = await supabase
+              .from("flats")
+              .update({ photos: uploaded })
+              .eq("id", created.id)
+            if (phErr) throw new Error(phErr.message)
+          } catch (photoErr) {
+            toast(
+              "error",
+              photoErr instanceof Error
+                ? `Flat added, but photos failed: ${photoErr.message}`
+                : "Flat added, but some photos failed to upload."
+            )
+          }
+        }
         toast("success", `Flat ${payload.flat_number} added.`)
       }
       onClose()
@@ -318,6 +358,15 @@ export default function FlatFormDialog({
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
+
+        <PhotoUploader
+          label="Flat photos"
+          paths={photos}
+          onPathsChange={setPhotos}
+          pending={pendingPhotos}
+          onPendingChange={setPendingPhotos}
+          disabled={saving}
+        />
 
         {error && (
           <p className="text-sm text-destructive" role="alert">

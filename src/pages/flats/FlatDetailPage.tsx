@@ -26,6 +26,7 @@ import AddTenantDialog from "@/components/tenants/AddTenantDialog"
 import OnboardingLinkDialog from "@/components/tenants/OnboardingLinkDialog"
 import EndTenancyDialog from "@/components/tenants/EndTenancyDialog"
 import MetersTab from "@/components/meters/MetersTab"
+import PhotoGallery from "@/components/properties/PhotoGallery"
 import { inr } from "@/lib/format"
 
 const FLAT_BADGE: Record<Flat["status"], "available" | "paid" | "partial" | "neutral"> = {
@@ -109,6 +110,14 @@ export default function FlatDetailPage() {
 
   const f = flat.data
   const floorName = floors.data?.find((fl) => fl.id === f.floor_id)?.name
+  // Flat photos first; fall back to the property's photos when the flat has none.
+  const flatPhotos = f.photos ?? []
+  const galleryPhotos =
+    flatPhotos.length > 0 ? flatPhotos : (property.data?.photos ?? [])
+  const galleryCaption =
+    flatPhotos.length === 0 && galleryPhotos.length > 0
+      ? "Property photos"
+      : undefined
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -168,6 +177,9 @@ export default function FlatDetailPage() {
 
       {tab === "overview" ? (
       <>
+      {galleryPhotos.length > 0 && (
+        <PhotoGallery paths={galleryPhotos} caption={galleryCaption} />
+      )}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">

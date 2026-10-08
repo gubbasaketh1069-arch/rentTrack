@@ -41,6 +41,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 import { inr } from "@/lib/format"
 
 interface PortfolioStats {
@@ -123,26 +124,31 @@ export default function DashboardPage() {
     {
       label: "Expected Rent",
       icon: IndianRupee,
+      tone: "neutral" as const,
       value: loading ? null : inr(s?.expectedRent ?? 0),
     },
     {
       label: "Outstanding Due",
       icon: AlertCircle,
+      tone: "danger" as const,
       value: loading ? null : inr(s?.outstandingDue ?? 0),
     },
     {
       label: "Expenses (this month)",
       icon: Receipt,
+      tone: "neutral" as const,
       value: loading ? null : inr(s?.expensesThisMonth ?? 0),
     },
     {
       label: "Total Properties",
       icon: Building2,
+      tone: "neutral" as const,
       value: loading ? null : String(properties.data?.length ?? 0),
     },
     {
       label: "Flats (Occupied)",
       icon: BedDouble,
+      tone: "neutral" as const,
       value: loading
         ? null
         : `${s?.flatCount ?? 0} (${s?.occupiedCount ?? 0})`,
@@ -150,6 +156,7 @@ export default function DashboardPage() {
     {
       label: "Active Tenants",
       icon: Users,
+      tone: "neutral" as const,
       value: loading ? null : String(s?.tenantCount ?? 0),
     },
   ]
@@ -184,7 +191,14 @@ export default function DashboardPage() {
                 {stat.value === null ? (
                   <Skeleton className="h-8 w-24" />
                 ) : (
-                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div
+                    className={cn(
+                      "text-3xl font-extrabold tracking-tight",
+                      stat.tone === "danger" && "text-status-due"
+                    )}
+                  >
+                    {stat.value}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -294,9 +308,9 @@ function FinancialAnalytics() {
                   <YAxis fontSize={12} tickFormatter={(v: number) => `₹${Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : v}`} />
                   <Tooltip formatter={(value) => inr(Number(value ?? 0))} />
                   <Legend />
-                  <Bar dataKey="expected" name="Expected rent" fill="#4f46e5" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="collected" name="Collected" fill="#16a34a" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#f97316" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="expected" name="Expected rent" fill="#000000" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="collected" name="Collected" fill="#06C167" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="expenses" name="Expenses" fill="#E11900" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -313,8 +327,8 @@ function FinancialAnalytics() {
 
 const SEVERITY_STYLES: Record<string, string> = {
   red: "border-red-200 bg-red-50 text-red-800",
-  orange: "border-orange-200 bg-orange-50 text-orange-800",
-  blue: "border-blue-200 bg-blue-50 text-blue-800",
+  orange: "border-amber-200 bg-amber-50 text-amber-800",
+  blue: "border-neutral-200 bg-neutral-50 text-neutral-800",
 }
 
 function SmartAlerts() {

@@ -12,6 +12,8 @@ import {
   useMarketplaceSearch,
   type ListingWithJoins,
 } from "@/hooks/useMarketplace"
+import { firstPhoto, propertyPhotoUrl } from "@/lib/propertyPhotos"
+import { PhotoPlaceholder } from "@/components/properties/PhotoGallery"
 import { FLAT_FEATURES } from "@/lib/constants"
 import { inr, locationLine } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -72,26 +74,37 @@ function matches(l: ListingWithJoins, f: Filters): boolean {
   return true
 }
 
+/**
+ * Cover photo priority: listing photos → flat photos → property photos →
+ * honest neutral placeholder. Makes the photo-led cards real.
+ */
+function listingCoverUrl(l: ListingWithJoins): string | null {
+  const listingThumb = [...(l.photos ?? [])].sort(
+    (a, b) => a.sort_order - b.sort_order
+  )[0]
+  if (listingThumb) return listingPhotoUrl(listingThumb.storage_path)
+  const fallback = firstPhoto(l.flat?.photos) ?? firstPhoto(l.property?.photos)
+  return fallback ? propertyPhotoUrl(fallback) : null
+}
+
 function ListingCard({ l }: { l: ListingWithJoins }) {
-  const thumb = [...(l.photos ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0]
+  const coverUrl = listingCoverUrl(l)
   const feats = (l.flat?.features ?? []).map((x) => x.feature)
   return (
     <Link to={`/home/find-flat/${l.id}`}>
       <Card className="overflow-hidden transition-shadow hover:shadow-md">
-        {thumb ? (
+        {coverUrl ? (
           <img
-            src={listingPhotoUrl(thumb.storage_path)}
+            src={coverUrl}
             alt=""
-            className="h-44 w-full object-cover"
+            className="h-52 w-full object-cover"
           />
         ) : (
-          <div className="flex h-44 items-center justify-center bg-muted text-muted-foreground">
-            <Search className="h-8 w-8" />
-          </div>
+          <PhotoPlaceholder className="h-52 w-full" />
         )}
-        <div className="space-y-1.5 p-4">
+        <div className="space-y-1.5 p-5">
           <div className="flex items-start justify-between gap-2">
-            <p className="font-semibold leading-tight">{l.title}</p>
+            <p className="font-bold leading-tight tracking-tight">{l.title}</p>
             {l.status === "FEATURED" && <Badge variant="info">Featured</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">
@@ -103,9 +116,9 @@ function ListingCard({ l }: { l: ListingWithJoins }) {
             {l.flat?.bhk_type ? ` · ${l.flat.bhk_type}` : ""}
             {l.flat?.floor?.name ? ` · ${l.flat.floor.name} floor` : ""}
           </p>
-          <p className="text-lg font-bold">
+          <p className="text-2xl font-extrabold tracking-tight">
             {inr(l.rent ?? l.flat?.rent ?? 0)}
-            <span className="text-xs font-normal text-muted-foreground"> /month</span>
+            <span className="text-xs font-medium text-muted-foreground"> /month</span>
           </p>
           {feats.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-1">

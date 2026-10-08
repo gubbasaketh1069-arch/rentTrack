@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { Megaphone, Pencil, Plus, Trash2 } from "lucide-react"
+import { Building2, Megaphone, Pencil, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -177,24 +177,24 @@ export default function ListingsPage() {
                   <img
                     src={listingPhotoUrl(thumb.storage_path)}
                     alt=""
-                    className="h-40 w-full object-cover"
+                    className="h-52 w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-40 items-center justify-center bg-muted text-muted-foreground">
-                    <Megaphone className="h-8 w-8" />
+                  <div className="flex h-52 items-center justify-center bg-[#F0F0F0] text-neutral-400">
+                    <Building2 className="h-10 w-10" />
                   </div>
                 )}
-                <div className="space-y-2 p-4">
+                <div className="space-y-2 p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold leading-tight">{l.title}</p>
+                    <p className="font-bold leading-tight tracking-tight">{l.title}</p>
                     <Badge variant={statusVariant(l.status)}>{l.status}</Badge>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     {l.property?.name}
                     {l.flat?.flat_number ? ` · Flat ${l.flat.flat_number}` : ""}
                   </p>
-                  <p className="text-lg font-bold">{inr(l.rent ?? 0)}
-                    <span className="text-xs font-normal text-muted-foreground"> /month</span>
+                  <p className="text-2xl font-extrabold tracking-tight">{inr(l.rent ?? 0)}
+                    <span className="text-xs font-medium text-muted-foreground"> /month</span>
                   </p>
                   <div className="flex flex-wrap gap-2 pt-1">
                     {(l.status === "DRAFT" || l.status === "PAUSED") && (
