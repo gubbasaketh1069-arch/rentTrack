@@ -264,12 +264,21 @@ export function useCreateProperty() {
   return useMutation({
     mutationFn: async (input: PropertyInput): Promise<Property> => {
       // The on_property_created trigger adds the PRIMARY_OWNER membership row.
-      const { data, error } = await supabase
+      // NOTE: Insert without RETURNING (.select()) -- the RLS USING check on
+      // INSERT...RETURNING wrongly rejects the new row, while plain INSERT
+      // (WITH CHECK only) succeeds. Generate the id client-side, insert,
+      // then fetch the row with a separate SELECT (which passes RLS).
+      const newId = crypto.randomUUID()
+      const { error } = await supabase
         .from("properties")
-        .insert({ ...input, owner_id: user!.id })
-        .select()
-        .single()
+        .insert({ ...input, id: newId, owner_id: user!.id })
       if (error) throw new Error(error.message)
+      const { data, error: fetchError } = await supabase
+        .from("properties")
+        .select("*")
+        .eq("id", newId)
+        .single()
+      if (fetchError) throw new Error(fetchError.message)
       return data as Property
     },
     onSuccess: (data) => {
@@ -374,18 +383,25 @@ export function useCreateFlat(propertyId: string) {
   return useMutation({
     mutationFn: async (input: FlatInput): Promise<Flat> => {
       const { features, ...flat } = input
-      const { data, error } = await supabase
+      // NOTE: Insert without RETURNING -- see useCreateProperty for why.
+      // Generate the id client-side so flat_features can reference it.
+      const newId = crypto.randomUUID()
+      const { error } = await supabase
         .from("flats")
-        .insert({ ...flat, property_id: propertyId })
-        .select()
-        .single()
+        .insert({ ...flat, id: newId, property_id: propertyId })
       if (error) throw new Error(error.message)
       if (features.length > 0) {
         const { error: featError } = await supabase
           .from("flat_features")
-          .insert(features.map((feature) => ({ flat_id: data.id, feature })))
+          .insert(features.map((feature) => ({ flat_id: newId, feature })))
         if (featError) throw new Error(featError.message)
       }
+      const { data, error: fetchError } = await supabase
+        .from("flats")
+        .select("*")
+        .eq("id", newId)
+        .single()
+      if (fetchError) throw new Error(fetchError.message)
       return data as Flat
     },
     onSuccess: () => invalidateProperty(qc, propertyId),
