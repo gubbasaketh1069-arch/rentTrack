@@ -1,13 +1,14 @@
 import { Link } from "react-router-dom"
-import { BellRing } from "lucide-react"
+import { useState } from "react"
+import { BellRing, Zap } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/components/ui/toast"
-import { useDueList, useQueueRentReminders } from "@/hooks/useBillingData"
+import { useDueList, useGenerateMonthlyBills, useQueueRentReminders } from "@/hooks/useBillingData"
 import { isWhatsAppConfigured } from "@/lib/whatsapp"
-import { monthLabel } from "@/lib/billing"
+import { currentYearMonth, monthLabel } from "@/lib/billing"
 import { inr } from "@/lib/format"
 
 const STATUS_BADGE: Record<string, "paid" | "partial" | "due" | "neutral"> = {
@@ -25,8 +26,12 @@ const STATUS_BADGE: Record<string, "paid" | "partial" | "due" | "neutral"> = {
 export default function DuePage() {
   const due = useDueList()
   const queueReminders = useQueueRentReminders()
+  const generateBills = useGenerateMonthlyBills()
   const { toast } = useToast()
   const waConfigured = isWhatsAppConfigured()
+  const now = currentYearMonth()
+  const [genYear, setGenYear] = useState(now.year)
+  const [genMonth, setGenMonth] = useState(now.month)
 
   if (due.isLoading) {
     return (
@@ -56,6 +61,74 @@ export default function DuePage() {
           Outstanding rent across all properties — latest bill per active tenancy.
         </p>
       </div>
+
+      <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Zap className="h-4 w-4 text-blue-600" />
+            Auto-generate monthly bills
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Creates bills for every active tenancy that doesn't have one yet.
+            Rent uses the current effective rate (change rent first if needed),
+            previous dues carry over automatically. Electric and bore stay at
+            ₹0 — add them by editing each bill.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <label htmlFor="gen-month" className="text-sm font-medium">
+                Month
+              </label>
+              <select
+                id="gen-month"
+                value={`${genYear}-${genMonth}`}
+                onChange={(e) => {
+                  const [y, m] = e.target.value.split("-").map(Number)
+                  setGenYear(y)
+                  setGenMonth(m)
+                }}
+                className="flex h-9 rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {(() => {
+                  const opts: Array<{ y: number; m: number }> = []
+                  for (let i = 0; i < 4; i++) {
+                    const d = new Date(now.year, now.month - 1 - i, 1)
+                    opts.push({ y: d.getFullYear(), m: d.getMonth() + 1 })
+                  }
+                  return opts.map((o) => (
+                    <option key={`${o.y}-${o.m}`} value={`${o.y}-${o.m}`}>
+                      {monthLabel(o.y, o.m)}
+                    </option>
+                  ))
+                })()}
+              </select>
+            </div>
+            <Button
+              disabled={generateBills.isPending}
+              onClick={() =>
+                generateBills.mutate(
+                  { year: genYear, month: genMonth },
+                  {
+                    onSuccess: (r) =>
+                      toast(
+                        "success",
+                        r.created > 0
+                          ? `${r.created} bill${r.created === 1 ? "" : "s"} created for ${r.monthLabel}.`
+                          : `All tenancies already have bills for ${r.monthLabel}.`
+                      ),
+                    onError: (e) =>
+                      toast("error", e instanceof Error ? e.message : "Generation failed."),
+                  }
+                )
+              }
+            >
+              {generateBills.isPending ? "Generating…" : "Generate bills"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

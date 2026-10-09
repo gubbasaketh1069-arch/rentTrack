@@ -14,7 +14,6 @@ import { ConfirmDialog } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/toast"
 import {
   useDeleteMeter,
-  useDeleteReading,
   useMeterReadings,
   useMeterSplits,
   useMeters,
@@ -49,20 +48,6 @@ function meterLine(m: Meter): string {
 
 function ReadingList({ meterId }: { meterId: string }) {
   const readings = useMeterReadings(meterId)
-  const { toast } = useToast()
-  const deleteMutation = useDeleteReading()
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-
-  async function confirmDeleteReading() {
-    if (!deletingId) return
-    try {
-      await deleteMutation.mutateAsync(deletingId)
-      toast("success", "Reading deleted.")
-      setDeletingId(null)
-    } catch (err) {
-      toast("error", err instanceof Error ? err.message : "Could not delete reading.")
-    }
-  }
 
   if (readings.isLoading) return <Skeleton className="h-10 w-full" />
   if (readings.error)
@@ -77,42 +62,28 @@ function ReadingList({ meterId }: { meterId: string }) {
       <p className="text-sm text-muted-foreground">No readings recorded yet.</p>
     )
   return (
-    <>
-      <ul className="divide-y rounded-md border">
-        {rows.map((r) => (
-          <li
-            key={r.id}
-            className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+    <ul className="divide-y rounded-md border">
+      {rows.map((r) => (
+        <li
+          key={r.id}
+          className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span className="font-medium">{r.reading_date}</span>
+            <span className="text-muted-foreground">
+              {r.previous_reading ?? 0} → {r.current_reading ?? 0}
+            </span>
+            <Badge variant="secondary">{r.units_used ?? 0} units</Badge>
+          </div>
+          <span
+            className="text-xs text-muted-foreground"
+            title="Readings are permanent history and can't be deleted"
           >
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <span className="font-medium">{r.reading_date}</span>
-              <span className="text-muted-foreground">
-                {r.previous_reading ?? 0} → {r.current_reading ?? 0}
-              </span>
-              <Badge variant="secondary">{r.units_used ?? 0} units</Badge>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setDeletingId(r.id)}
-              title="Delete reading"
-              className="hover:text-destructive"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <ConfirmDialog
-        open={!!deletingId}
-        onClose={() => setDeletingId(null)}
-        onConfirm={confirmDeleteReading}
-        title="Delete reading"
-        message="Delete this meter reading? This can't be undone."
-        confirmLabel="Delete"
-        confirming={deleteMutation.isPending}
-      />
-    </>
+            History
+          </span>
+        </li>
+      ))}
+    </ul>
   )
 }
 

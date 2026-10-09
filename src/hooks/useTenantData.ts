@@ -587,3 +587,33 @@ export function useSetPrimaryPhone(tenantId: string) {
     onSuccess: () => invalidateTenant(qc, tenantId),
   })
 }
+
+/**
+ * Delete a tenant — only allowed if they have no tenancy history.
+ * Tenants with past or active tenancies are blocked (history is never purged).
+ * Orphaned tenant records (e.g. created by mistake with no tenancy) can be removed.
+ */
+export function useDeleteTenant() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (tenantId: string) => {
+      // Check for any tenancy history.
+      const { data: tenancies, error: tenErr } = await supabase
+        .from("tenancies")
+        .select("id")
+        .eq("tenant_id", tenantId)
+        .limit(1)
+      if (tenErr) throw new Error(tenErr.message)
+      if (tenancies && tenancies.length > 0) {
+        throw new Error(
+          "This tenant has tenancy history and can't be deleted. Tenant records with history are kept permanently."
+        )
+      }
+      const { error } = await supabase.from("tenants").delete().eq("id", tenantId)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tenants"] })
+    },
+  })
+}

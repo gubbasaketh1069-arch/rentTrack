@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { ArrowLeft, Eye, EyeOff, Pencil, Phone, Plus, Trash2, Users } from "lucide-react"
 import { intervalToDuration } from "date-fns"
 import {
   useAddPhoneNumber,
   useDeleteFamilyMember,
   useDeletePhoneNumber,
+  useDeleteTenant,
   useFamilyMembers,
   usePhoneNumbers,
   useSetPrimaryPhone,
@@ -116,6 +117,9 @@ export default function TenantProfilePage() {
   const addPhone = useAddPhoneNumber(id ?? "")
   const deletePhone = useDeletePhoneNumber(id ?? "")
   const setPrimary = useSetPrimaryPhone(id ?? "")
+  const deleteTenant = useDeleteTenant()
+  const navigate = useNavigate()
+  const [confirmDeleteTenant, setConfirmDeleteTenant] = useState(false)
 
   const [editOpen, setEditOpen] = useState(false)
   const [editFields, setEditFields] = useState({
@@ -279,6 +283,14 @@ export default function TenantProfilePage() {
           </div>
           <Button variant="outline" size="sm" onClick={openEdit}>
             <Pencil className="mr-1 h-3 w-3" /> Edit tenant
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+            onClick={() => setConfirmDeleteTenant(true)}
+          >
+            <Trash2 className="mr-1 h-3 w-3" /> Delete
           </Button>
         </div>
       </div>
@@ -786,6 +798,26 @@ export default function TenantProfilePage() {
         title="Reveal full Aadhaar number?"
         message="Aadhaar numbers are sensitive. Only reveal this if you need it for verification, and never share or export it."
         confirmLabel="Reveal"
+      />
+
+      <ConfirmDialog
+        open={confirmDeleteTenant}
+        onClose={() => setConfirmDeleteTenant(false)}
+        onConfirm={async () => {
+          try {
+            await deleteTenant.mutateAsync(id!)
+            toast("success", "Tenant deleted.")
+            navigate("/tenants", { replace: true })
+          } catch (err) {
+            toast("error", err instanceof Error ? err.message : "Could not delete tenant.")
+          } finally {
+            setConfirmDeleteTenant(false)
+          }
+        }}
+        title={`Delete ${tenant.data?.full_name ?? "this tenant"}?`}
+        message="The tenant record is removed permanently. This is only allowed if they have no tenancy history — tenants with past or active tenancies can't be deleted."
+        confirming={deleteTenant.isPending}
+        confirmLabel="Delete"
       />
 
       {active && (

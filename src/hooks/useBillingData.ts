@@ -832,3 +832,161 @@ export function useQueueRentReminders() {
     },
   })
 }
+
+export interface GenerateBillsResult {
+  created: number
+  skipped: number
+  monthLabel: string
+}
+
+/**
+ * Bulk-generate monthly bills for all active tenancies (owner taps once per
+ * month instead of creating each bill manually).
+ *
+ * For each ACTIVE tenancy without a bill for (year, month):
+ * - applicable_rent = effective rent on the 1st of the month (latest
+ *   rent_history with effective_date <= month start, else flat rent).
+ *   If the owner changed rent before generating, the new rent applies.
+ * - maintenance = flat's maintenance.
+ * - current_bill / bore_bill / cleaning / other_charges = 0 (owner edits
+ *   the bill manually to add electric/bore — these stay manual by design).
+ * - previous_due = last month's remaining_due (auto-carried).
+ *
+ * Uses plain INSERT (no RETURNING) to avoid the RLS USING-check issue on
+ * INSERT...RETURNING.
+ */
+export function useGenerateMonthlyBills() {
+  const qc = useQueryClient()
+  const { user } = useAuth()
+  return useMutation({
+    mutationFn: async ({
+      year,
+      month,
+    }: {
+      year: number
+      month: number
+    }): Promise<GenerateBillsResult> => {
+      // 1. Owner's properties.
+      const { data: props, error: propErr } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("owner_id", user!.id)
+      if (propErr) throw new Error(propErr.message)
+      const propertyIds = (props ?? []).map((p) => p.id)
+      if (propertyIds.length === 0) return { created: 0, skipped: 0, monthLabel: monthLabel(year, month) }
+
+      // 2. Active tenancies with flat rent/maintenance.
+      const { data: tenancies, error: tenErr } = await supabase
+        .from("tenancies")
+        .select("id, property_id, flat_id, flat:flats(id, rent, maintenance)")
+        .in("property_id", propertyIds)
+        .eq("status", "ACTIVE")
+      if (tenErr) throw new Error(tenErr.message)
+
+      // 3. Existing bills for the target month (to skip).
+      const { data: existing, error: existErr } = await supabase
+        .from("monthly_records")
+        .select("tenancy_id")
+        .eq("year", year)
+        .eq("month", month)
+        .in(
+          "tenancy_id",
+          (tenancies ?? []).map((t) => t.id)
+        )
+      if (existErr) throw new Error(existErr.message)
+      const billedTenancyIds = new Set((existing ?? []).map((r) => r.tenancy_id))
+
+      const monthStart = `${year}-${String(month).padStart(2, "0")}-01`
+      let created = 0
+      let skipped = 0
+
+      for (const t of tenancies ?? []) {
+        if (billedTenancyIds.has(t.id)) {
+          skipped++
+          continue
+        }
+        const flat = Array.isArray(t.flat) ? t.flat[0] : t.flat
+        if (!flat) {
+          skipped++
+          continue
+        }
+
+        // Effective rent: latest rent_history <= month start, else flat rent.
+        let rent = Number(flat.rent)
+        const { data: rh } = await supabase
+          .from("rent_history")
+          .select("new_rent, effective_date")
+          .eq("tenancy_id", t.id)
+          .lte("effective_date", monthStart)
+          .order("effective_date", { ascending: false })
+          .order("created_at", { ascending: false })
+          .limit(1)
+        if (rh && rh.length > 0) rent = Number(rh[0].new_rent)
+
+        const maintenance = Number(flat.maintenance)
+
+        // Previous due: latest record strictly before (year, month).
+        const { data: prior } = await supabase
+          .from("monthly_records")
+          .select("year, month, remaining_due")
+          .eq("tenancy_id", t.id)
+          .order("year", { ascending: false })
+          .order("month", { ascending: false })
+        const prev = (prior ?? []).find(
+          (r) => compareMonth({ year: r.year, month: r.month }, { year, month }) < 0
+        )
+        const previousDue = prev ? Number(prev.remaining_due) : 0
+
+        const totalPayable = computeTotalPayable({
+          previous_due: previousDue,
+          rent,
+          maintenance,
+          current_bill: 0,
+          bore_bill: 0,
+          cleaning: 0,
+          other_charges: 0,
+          late_fee: 0,
+        })
+
+        // Plain INSERT (no .select()) — avoids the RLS RETURNING issue.
+        const { error: insErr } = await supabase.from("monthly_records").insert({
+          id: crypto.randomUUID(),
+          tenancy_id: t.id,
+          property_id: t.property_id,
+          flat_id: t.flat_id,
+          year,
+          month,
+          applicable_rent: rent,
+          maintenance,
+          current_bill: 0,
+          bore_bill: 0,
+          cleaning: 0,
+          other_charges: 0,
+          late_fee: 0,
+          previous_due: previousDue,
+          total_payable: totalPayable,
+          total_paid: 0,
+          remaining_due: totalPayable,
+          status: totalPayable > 0 ? "DUE" : "PAID",
+          notes: "Auto-generated",
+        })
+        if (insErr) {
+          // Skip duplicates (23505) — bill was created concurrently.
+          if (insErr.code === "23505") {
+            skipped++
+            continue
+          }
+          throw new Error(insErr.message)
+        }
+        created++
+      }
+
+      return { created, skipped, monthLabel: monthLabel(year, month) }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["due-list"] })
+      qc.invalidateQueries({ queryKey: ["monthly-records"] })
+      qc.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}

@@ -468,7 +468,17 @@ export function useDeleteFlat(propertyId: string) {
         .single()
       await deletePhotoObjects(((data?.photos as string[] | null) ?? []) as string[])
       const { error } = await supabase.from("flats").delete().eq("id", flatId)
-      if (error) throw new Error(error.message)
+      if (error) {
+        // FK violation: flat has tenancy/payment history. Block with a clear
+        // message instead of the raw database error — history is never purged.
+        if (error.code === "23503") {
+          throw new Error(
+            "This flat has tenancy or payment history and can't be deleted. " +
+            "Set its status to MAINTENANCE instead, or delete the entire property to remove everything."
+          )
+        }
+        throw new Error(error.message)
+      }
     },
     onSuccess: () => invalidateProperty(qc, propertyId),
   })
