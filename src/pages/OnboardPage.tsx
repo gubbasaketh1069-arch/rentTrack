@@ -164,7 +164,7 @@ export default function OnboardPage() {
   return (
     <div className="mx-auto max-w-xl space-y-6 p-6">
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-black">RentTrack</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">RentTrack</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Tenant onboarding — {validated.property_name}
           {validated.flat_number ? ` · Flat ${validated.flat_number}` : ""}

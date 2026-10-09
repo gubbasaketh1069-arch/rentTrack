@@ -9,7 +9,17 @@ export const FLAT_STATUSES = [
   "OCCUPIED",
   "NOTICE_PERIOD",
   "MAINTENANCE",
+  "OWNER_USE",
 ] as const
+
+/** Human-readable labels for flat statuses. */
+export const FLAT_STATUS_LABELS: Record<string, string> = {
+  AVAILABLE: "Available",
+  OCCUPIED: "Occupied",
+  NOTICE_PERIOD: "Notice period",
+  MAINTENANCE: "Under maintenance",
+  OWNER_USE: "Used by owner",
+}
 
 export const TENANCY_STATUSES = ["ACTIVE", "ENDED", "CANCELLED"] as const
 
@@ -123,3 +133,61 @@ export const FLOOR_STRUCTURE_PRESETS: Record<string, string[]> = {
   "G+3": ["Ground", "First", "Second", "Third"],
   "G+4": ["Ground", "First", "Second", "Third", "Fourth"],
 }
+
+/**
+ * Floor structure options for the property form dropdown.
+ * Each option auto-creates these floor records on property creation,
+ * so flats can be assigned to a real floor (no more "Unassigned").
+ */
+export const FLOOR_STRUCTURE_OPTIONS: Array<{
+  value: string
+  label: string
+  floors: string[]
+}> = [
+  { value: "G", label: "Ground only", floors: ["Ground"] },
+  { value: "G+1", label: "Ground + 1 floor", floors: ["Ground", "First"] },
+  {
+    value: "G+2",
+    label: "Ground + 2 floors",
+    floors: ["Ground", "First", "Second"],
+  },
+  {
+    value: "G+3",
+    label: "Ground + 3 floors",
+    floors: ["Ground", "First", "Second", "Third"],
+  },
+  {
+    value: "G+4",
+    label: "Ground + 4 floors",
+    floors: ["Ground", "First", "Second", "Third", "Fourth"],
+  },
+  { value: "1F", label: "1 floor (no ground)", floors: ["First"] },
+  { value: "2F", label: "2 floors (no ground)", floors: ["First", "Second"] },
+  {
+    value: "3F",
+    label: "3 floors (no ground)",
+    floors: ["First", "Second", "Third"],
+  },
+  { value: "CUSTOM", label: "Custom (add floors later)", floors: [] },
+]
+
+/** Property type options for the property form dropdown. */
+export const PROPERTY_TYPES = [
+  "Apartment",
+  "Independent House",
+  "Villa",
+  "PG / Co-living",
+  "Commercial",
+  "Plot",
+  "Other",
+] as const
+
+/** BHK options for the flat form dropdown. */
+export const BHK_OPTIONS = [
+  "1 RK",
+  "1 BHK",
+  "2 BHK",
+  "3 BHK",
+  "4 BHK",
+  "5+ BHK",
+] as const

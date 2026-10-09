@@ -47,6 +47,7 @@ import { inr } from "@/lib/format"
 interface PortfolioStats {
   flatCount: number
   occupiedCount: number
+  ownerUseCount: number
   expectedRent: number
   tenantCount: number
   outstandingDue: number
@@ -55,7 +56,7 @@ interface PortfolioStats {
 
 async function fetchPortfolioStats(propertyIds: string[]): Promise<PortfolioStats> {
   if (propertyIds.length === 0) {
-    return { flatCount: 0, occupiedCount: 0, expectedRent: 0, tenantCount: 0, outstandingDue: 0, expensesThisMonth: 0 }
+    return { flatCount: 0, occupiedCount: 0, ownerUseCount: 0, expectedRent: 0, tenantCount: 0, outstandingDue: 0, expensesThisMonth: 0 }
   }
   const now = new Date()
   const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`
@@ -87,10 +88,13 @@ async function fetchPortfolioStats(propertyIds: string[]): Promise<PortfolioStat
   if (expensesRes.error) throw new Error(expensesRes.error.message)
 
   const flats = flatsRes.data as Array<{ rent: number | string; status: string }>
+  // Owner-occupied flats don't generate rent and aren't vacant.
+  const rentableFlats = flats.filter((f) => f.status !== "OWNER_USE")
   return {
     flatCount: flats.length,
     occupiedCount: flats.filter((f) => f.status === "OCCUPIED").length,
-    expectedRent: flats.reduce((s, f) => s + Number(f.rent), 0),
+    ownerUseCount: flats.filter((f) => f.status === "OWNER_USE").length,
+    expectedRent: rentableFlats.reduce((s, f) => s + Number(f.rent), 0),
     tenantCount: tenanciesRes.count ?? 0,
     outstandingDue: (dueRes.data as Array<{ remaining_due: number | string }>).reduce(
       (s, r) => s + Number(r.remaining_due),
@@ -163,11 +167,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-md">
+        <h2 className="text-2xl font-bold tracking-tight text-white">
           {profile?.full_name ? `Welcome, ${profile.full_name.split(" ")[0]}` : "Dashboard"}
         </h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-blue-100">
           Portfolio overview across all your properties.
         </p>
       </div>
@@ -179,30 +183,48 @@ export default function DashboardPage() {
         </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {cards.map((stat) => (
-            <Card key={stat.label}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                {stat.value === null ? (
-                  <Skeleton className="h-8 w-24" />
-                ) : (
-                  <div
+          {cards.map((stat) => {
+            const danger = stat.tone === "danger"
+            return (
+              <Card
+                key={stat.label}
+                className={cn(
+                  "overflow-hidden border-t-4",
+                  danger ? "border-t-red-500" : "border-t-blue-500"
+                )}
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </CardTitle>
+                  <span
                     className={cn(
-                      "text-3xl font-extrabold tracking-tight",
-                      stat.tone === "danger" && "text-status-due"
+                      "rounded-xl p-2",
+                      danger
+                        ? "bg-red-100 text-red-600"
+                        : "bg-blue-100 text-blue-600"
                     )}
                   >
-                    {stat.value}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                    <stat.icon className="h-4 w-4" />
+                  </span>
+                </CardHeader>
+                <CardContent>
+                  {stat.value === null ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    <div
+                      className={cn(
+                        "text-3xl font-extrabold tracking-tight",
+                        danger && "text-status-due"
+                      )}
+                    >
+                      {stat.value}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )
+          })}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -308,9 +330,9 @@ function FinancialAnalytics() {
                   <YAxis fontSize={12} tickFormatter={(v: number) => `₹${Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : v}`} />
                   <Tooltip formatter={(value) => inr(Number(value ?? 0))} />
                   <Legend />
-                  <Bar dataKey="expected" name="Expected rent" fill="#000000" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="collected" name="Collected" fill="#06C167" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="expenses" name="Expenses" fill="#E11900" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="expected" name="Expected rent" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="collected" name="Collected" fill="#16A34A" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="expenses" name="Expenses" fill="#DC2626" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

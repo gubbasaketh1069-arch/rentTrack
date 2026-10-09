@@ -25,6 +25,10 @@ import { useToast } from "@/components/ui/toast"
 import { supabase } from "@/lib/supabase"
 import { uploadPropertyPhoto } from "@/lib/propertyPhotos"
 import PhotoUploader from "@/components/properties/PhotoUploader"
+import {
+  FLOOR_STRUCTURE_OPTIONS,
+  PROPERTY_TYPES,
+} from "@/lib/constants"
 
 const EMPTY: PropertyInput = {
   name: "",
@@ -242,8 +246,61 @@ export default function PropertyFormPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {field("name", "Property name", "ABC Residency", { required: true })}
             <div className="grid gap-4 sm:grid-cols-2">
-              {field("property_type", "Property type", "Apartment, Villa, …")}
-              {field("floor_structure", "Floor structure", "G+2")}
+              <div className="space-y-2">
+                <Label htmlFor="property_type">Property type</Label>
+                <select
+                  id="property_type"
+                  value={form.property_type ?? ""}
+                  onChange={(e) => set("property_type", e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Select type…</option>
+                  {PROPERTY_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="floor_structure">
+                  Floor structure{" "}
+                  {!isEdit && (
+                    <span className="text-xs font-normal text-muted-foreground">
+                      — floors auto-created
+                    </span>
+                  )}
+                </Label>
+                <select
+                  id="floor_structure"
+                  value={form.floor_structure ?? ""}
+                  onChange={(e) => set("floor_structure", e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Select structure…</option>
+                  {FLOOR_STRUCTURE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                  {form.floor_structure &&
+                    !FLOOR_STRUCTURE_OPTIONS.some(
+                      (o) => o.value === form.floor_structure
+                    ) && (
+                      <option value={form.floor_structure}>
+                        {form.floor_structure} (custom)
+                      </option>
+                    )}
+                </select>
+                {!isEdit && form.floor_structure && form.floor_structure !== "CUSTOM" && (
+                  <p className="text-xs text-muted-foreground">
+                    Will create:{" "}
+                    {FLOOR_STRUCTURE_OPTIONS.find(
+                      (o) => o.value === form.floor_structure
+                    )?.floors.join(", ") ?? "—"}
+                  </p>
+                )}
+              </div>
             </div>
             {field("address", "Address", "Door no, street")}
             <div className="grid gap-4 sm:grid-cols-2">

@@ -46,20 +46,20 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // RentTrack status palette — Uber-style reskin:
-        // Green = Paid / Available (brand #06C167), Amber = Partial,
-        // Red = Due (restrained), Black = Information, Slate = Neutral
+        // RentTrack status palette — Vibrant Modern:
+        // Green #16A34A = Paid / Available (money in), Amber #F59E0B = Partial / pending,
+        // Red #DC2626 = Due / overdue, Blue #2563EB = info / occupied, Slate = neutral
         status: {
-          paid: "hsl(151 94% 39%)",
-          partial: "hsl(32 95% 45%)",
-          due: "hsl(7 100% 45%)",
-          available: "hsl(151 94% 39%)",
-          info: "hsl(0 0% 9%)",
-          neutral: "hsl(0 0% 45%)",
+          paid: "hsl(142 71% 45%)",
+          partial: "hsl(38 92% 50%)",
+          due: "hsl(0 72% 51%)",
+          available: "hsl(142 71% 45%)",
+          info: "hsl(217 91% 60%)",
+          neutral: "hsl(215 16% 47%)",
         },
-        // Uber-green brand accent — money-in / success only
+        // Vibrant blue brand accent
         brand: {
-          DEFAULT: "#06C167",
+          DEFAULT: "#2563EB",
           foreground: "#FFFFFF",
         },
       },

@@ -50,7 +50,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
           R
         </div>
         <div>
@@ -71,7 +71,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   cn(
                     "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-200"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }
@@ -129,7 +129,7 @@ export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-r bg-card lg:block">
         <SidebarContent />

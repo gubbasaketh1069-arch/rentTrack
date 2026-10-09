@@ -45,11 +45,12 @@ import { useMyPropertyRole } from "@/hooks/useMarketplace"
 import { inr, locationLine } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-const FLAT_BADGE: Record<Flat["status"], "available" | "paid" | "partial" | "neutral"> = {
+const FLAT_BADGE: Record<Flat["status"], "available" | "paid" | "partial" | "neutral" | "info"> = {
   AVAILABLE: "available",
   OCCUPIED: "paid",
   NOTICE_PERIOD: "partial",
   MAINTENANCE: "neutral",
+  OWNER_USE: "info",
 }
 
 function StatCard({

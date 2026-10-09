@@ -29,11 +29,12 @@ import MetersTab from "@/components/meters/MetersTab"
 import PhotoGallery from "@/components/properties/PhotoGallery"
 import { inr } from "@/lib/format"
 
-const FLAT_BADGE: Record<Flat["status"], "available" | "paid" | "partial" | "neutral"> = {
+const FLAT_BADGE: Record<Flat["status"], "available" | "paid" | "partial" | "neutral" | "info"> = {
   AVAILABLE: "available",
   OCCUPIED: "paid",
   NOTICE_PERIOD: "partial",
   MAINTENANCE: "neutral",
+  OWNER_USE: "info",
 }
 
 function Field({ label, value }: { label: string; value: string }) {

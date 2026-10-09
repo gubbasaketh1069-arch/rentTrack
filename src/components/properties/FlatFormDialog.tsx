@@ -6,7 +6,7 @@ import {
   type FlatInput,
   type Floor,
 } from "@/hooks/usePropertyData"
-import { FLAT_FEATURES, FLAT_STATUSES } from "@/lib/constants"
+import { FLAT_FEATURES, FLAT_STATUSES, FLAT_STATUS_LABELS, BHK_OPTIONS } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -215,12 +215,19 @@ export default function FlatFormDialog({
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="flat-bhk">BHK type</Label>
-            <Input
+            <select
               id="flat-bhk"
-              placeholder="2 BHK"
               value={bhkType}
               onChange={(e) => setBhkType(e.target.value)}
-            />
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="">Select BHK…</option>
+              {BHK_OPTIONS.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <Label htmlFor="flat-room">Room type</Label>
@@ -282,10 +289,23 @@ export default function FlatFormDialog({
           >
             {FLAT_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s.replace("_", " ")}
+                {FLAT_STATUS_LABELS[s] ?? s.replace("_", " ")}
               </option>
             ))}
           </select>
+          {status === "OCCUPIED" && (
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Occupied means a tenant lives here. Add the tenant via "Add
+              tenant" after saving, or choose "Used by owner" if you use it
+              yourself.
+            </p>
+          )}
+          {status === "OWNER_USE" && (
+            <p className="text-xs text-muted-foreground">
+              This flat is used by you (the owner) — it won't appear as
+              available for rent.
+            </p>
+          )}
         </div>
 
         <div className="rounded-lg border p-4">

@@ -4,51 +4,52 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    /* Vibrant Modern: very light slate background, dark slate foreground */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    /* Uber-style: primary is black */
-    --primary: 0 0% 0%;
+    --popover-foreground: 222 47% 11%;
+    /* Vibrant blue primary #2563EB */
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    /* Neutral hover surface — brand green lives in tailwind `brand` */
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 9%;
-    /* Restrained red, dues/overdue only */
-    --destructive: 7 100% 45%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    /* Light blue hover surface */
+    --accent: 214 100% 97%;
+    --accent-foreground: 217 91% 45%;
+    /* Bright red for dues/overdue #DC2626 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 93%;
-    --input: 0 0% 93%;
-    --ring: 0 0% 0%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
     --radius: 1rem;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 96%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 96%;
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 96%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 0 0% 12%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 12%;
-    --accent-foreground: 0 0% 96%;
-    --destructive: 7 90% 55%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 15%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 15%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 20%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 20%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 20%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 72% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 0 0% 100%;
+    --border: 217 33% 22%;
+    --input: 217 33% 22%;
+    --ring: 217 91% 65%;
   }
 }
 
@@ -59,11 +60,21 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
-  /* Uber-style grotesque headings: bold, tight */
+  /* Vibrant Modern headings: bold, tight */
   h1,
   h2,
   h3 {
     @apply font-extrabold tracking-[-0.02em];
+  }
+}
+
+@layer utilities {
+  /* Vibrant gradient banner for page headers (Dashboard, Properties, ...) */
+  .bg-brand-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600;
+  }
+  .bg-brand-gradient-soft {
+    @apply bg-gradient-to-r from-blue-50 to-indigo-50;
   }
 }
 

@@ -4,8 +4,8 @@ import { useRentalScore } from "@/hooks/useRentalScore"
 import { SCORE_METHODOLOGY } from "@/lib/rentalScore"
 
 const GRADE_STYLES: Record<string, string> = {
-  A: "bg-brand text-white",
-  B: "bg-black text-white",
+  A: "bg-green-600 text-white",
+  B: "bg-blue-600 text-white",
   C: "bg-amber-500 text-white",
   D: "bg-red-500 text-white",
 }

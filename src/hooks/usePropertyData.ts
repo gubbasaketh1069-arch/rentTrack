@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth"
 import { logActivity } from "@/lib/activity"
 import { deletePhotoObjects } from "@/lib/propertyPhotos"
+import { FLOOR_STRUCTURE_OPTIONS } from "@/lib/constants"
 
 export interface Property {
   id: string
@@ -48,7 +49,7 @@ export interface Flat {
   rent: number
   deposit: number
   maintenance: number
-  status: "AVAILABLE" | "OCCUPIED" | "NOTICE_PERIOD" | "MAINTENANCE"
+  status: "AVAILABLE" | "OCCUPIED" | "NOTICE_PERIOD" | "MAINTENANCE" | "OWNER_USE"
   notes: string | null
   /** PG / co-living mode: the flat rents by bed. */
   is_pg: boolean
@@ -273,6 +274,23 @@ export function useCreateProperty() {
         .from("properties")
         .insert({ ...input, id: newId, owner_id: user!.id })
       if (error) throw new Error(error.message)
+      // Auto-create floor records from the chosen structure, so flats can
+      // be assigned to a real floor immediately (no more "Unassigned").
+      const structure = FLOOR_STRUCTURE_OPTIONS.find(
+        (o) => o.value === input.floor_structure
+      )
+      if (structure && structure.floors.length > 0) {
+        const { error: floorError } = await supabase.from("floors").insert(
+          structure.floors.map((name, i) => ({
+            id: crypto.randomUUID(),
+            property_id: newId,
+            name,
+            sort_order: i,
+          }))
+        )
+        // Floors are a convenience -- don't fail property creation if this fails.
+        if (floorError) console.warn("Auto-create floors failed:", floorError.message)
+      }
       const { data, error: fetchError } = await supabase
         .from("properties")
         .select("*")
