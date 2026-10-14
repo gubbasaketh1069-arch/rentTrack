@@ -47,6 +47,9 @@ export default function SignupPage() {
         password,
         options: {
           data: { full_name: fullName.trim() || null, role: accountType },
+          // After clicking the email verification link, Supabase redirects
+          // back here so the user lands in the app instead of a dead page.
+          emailRedirectTo: `${window.location.origin}/login`,
         },
       })
       if (signUpError) {
