@@ -62,10 +62,10 @@ export default function DuePage() {
         </p>
       </div>
 
-      <Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+      <Card className="border-orange-500/30 bg-orange-500/10 dark:border-orange-500/30 dark:bg-orange-500/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Zap className="h-4 w-4 text-blue-600" />
+            <Zap className="h-4 w-4 text-orange-400" />
             Auto-generate monthly bills
           </CardTitle>
         </CardHeader>

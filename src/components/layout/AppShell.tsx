@@ -50,9 +50,11 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-sm font-bold text-white shadow-sm">
-          R
-        </div>
+        <img
+          src="/logo.png"
+          alt="RentTrack"
+          className="h-8 w-8 rounded-lg shadow-sm"
+        />
         <div>
           <p className="text-sm font-bold leading-none">RentTrack</p>
           <p className="text-[11px] text-muted-foreground">
@@ -71,7 +73,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                   cn(
                     "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors",
                     isActive
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm shadow-blue-200"
+                      ? "bg-gradient-to-r from-orange-500 to-pink-600 text-white shadow-sm shadow-orange-500/20"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )
                 }

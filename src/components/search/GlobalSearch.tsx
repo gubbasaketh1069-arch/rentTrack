@@ -134,7 +134,7 @@ export default function GlobalSearch() {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search tenants, properties, flats, payments…"
-          className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-600"
+          className="w-full rounded-md border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-orange-500"
         />
       </div>
       {open && debounced.length >= 2 && (

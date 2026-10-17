@@ -167,11 +167,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-md">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-orange-500 via-rose-500 to-pink-600 p-6 text-white shadow-md">
         <h2 className="text-2xl font-bold tracking-tight text-white">
           {profile?.full_name ? `Welcome, ${profile.full_name.split(" ")[0]}` : "Dashboard"}
         </h2>
-        <p className="mt-1 text-sm text-blue-100">
+        <p className="mt-1 text-sm text-orange-100">
           Portfolio overview across all your properties.
         </p>
       </div>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                 key={stat.label}
                 className={cn(
                   "overflow-hidden border-t-4",
-                  danger ? "border-t-red-500" : "border-t-blue-500"
+                  danger ? "border-t-red-500" : "border-t-orange-500"
                 )}
               >
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                       "rounded-xl p-2",
                       danger
                         ? "bg-red-100 text-red-600"
-                        : "bg-blue-100 text-blue-600"
+                        : "bg-orange-500/15 text-orange-300"
                     )}
                   >
                     <stat.icon className="h-4 w-4" />

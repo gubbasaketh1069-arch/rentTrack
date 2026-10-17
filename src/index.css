@@ -4,52 +4,52 @@
 
 @layer base {
   :root {
-    /* Vibrant Modern: very light slate background, dark slate foreground */
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    /* Vibrant blue primary #2563EB */
-    --primary: 217 91% 60%;
+    /* Sunset Noir: near-black background, warm white foreground */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 96%;
+    --card: 240 8% 8%;
+    --card-foreground: 0 0% 96%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 96%;
+    /* Sunset orange primary #F97316 */
+    --primary: 25 95% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    /* Light blue hover surface */
-    --accent: 214 100% 97%;
-    --accent-foreground: 217 91% 45%;
-    /* Bright red for dues/overdue #DC2626 */
+    --secondary: 240 8% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 5% 65%;
+    /* Deep magenta hover surface, pink foreground */
+    --accent: 336 70% 14%;
+    --accent-foreground: 330 85% 78%;
+    /* Bright red for dues/overdue #EF4444 */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 25 95% 53%;
     --radius: 1rem;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 15%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 15%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 65%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 96%;
+    --card: 240 8% 8%;
+    --card-foreground: 0 0% 96%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 25 95% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 20%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 20%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 20%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 240 8% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 8% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 336 70% 14%;
+    --accent-foreground: 330 85% 78%;
     --destructive: 0 72% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 22%;
-    --input: 217 33% 22%;
-    --ring: 217 91% 65%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 25 95% 58%;
   }
 }
 
@@ -69,12 +69,12 @@
 }
 
 @layer utilities {
-  /* Vibrant gradient banner for page headers (Dashboard, Properties, ...) */
+  /* Sunset gradient banner for page headers (Dashboard, Properties, ...) */
   .bg-brand-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600;
+    @apply bg-gradient-to-r from-orange-500 via-rose-500 to-pink-600;
   }
   .bg-brand-gradient-soft {
-    @apply bg-gradient-to-r from-blue-50 to-indigo-50;
+    @apply bg-gradient-to-r from-orange-500/10 to-pink-500/10;
   }
 }
 
